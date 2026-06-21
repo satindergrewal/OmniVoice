@@ -93,7 +93,13 @@ Edit `voices.json`. Each voice is one of two modes:
 ```
 
 `GET /v1/audio/voices` lists the configured names. Unknown voices fall back to
-`default_voice`.
+`default_voice`. Keys starting with `_` (e.g. the shipped `_example_clone`) are
+treated as comments/templates — never listed, never selectable. Copy one, rename
+it without the underscore, and fill in your paths.
+
+For a clone: `ref_audio` is a path **on the machine running the proxy** (an
+absolute path), `ref_text` is the clip's transcript (omit it to auto-transcribe
+via Whisper), and clips should be mono and ≤ ~20s (longer is auto-trimmed).
 
 ### Per-request overrides (non-OpenAI extras)
 

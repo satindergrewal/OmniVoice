@@ -6,6 +6,12 @@
     "fable":   { "instruct": "male, british accent" },
     "onyx":    { "instruct": "male, low pitch" },
     "nova":    { "instruct": "female, high pitch" },
-    "shimmer": { "instruct": "female, young adult, high pitch" }
+    "shimmer": { "instruct": "female, young adult, high pitch" },
+
+    "_example_clone": {
+      "ref_audio": "/absolute/path/to/reference.wav",
+      "ref_text": "Exact transcript of what is spoken in reference.wav.",
+      "language": "English"
+    }
   }
 }

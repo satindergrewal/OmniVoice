@@ -104,7 +104,8 @@ VOICES = load_voices()
 def resolve_voice(name: Optional[str]) -> dict:
     """Map an OpenAI voice name to an OmniVoice voice spec dict."""
     voices = VOICES.get("voices", {})
-    if name and name in voices:
+    # Keys starting with "_" are treated as comments/templates: never selectable.
+    if name and not name.startswith("_") and name in voices:
         return voices[name]
     default = VOICES.get("default_voice")
     if default and default in voices:
@@ -240,7 +241,9 @@ def list_models() -> dict:
 
 @app.get("/v1/audio/voices")
 def list_voices() -> dict:
-    return {"voices": list(VOICES.get("voices", {}).keys())}
+    # Hide "_"-prefixed template/comment entries.
+    names = [k for k in VOICES.get("voices", {}) if not k.startswith("_")]
+    return {"voices": names}
 
 
 @app.post("/v1/audio/speech")
