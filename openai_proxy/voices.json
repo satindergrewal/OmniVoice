@@ -8,6 +8,28 @@
     "nova":    { "instruct": "female, high pitch" },
     "shimmer": { "instruct": "female, young adult, high pitch" },
 
+    "harley": {
+      "ref_audio": "voices/Harley_Quinn_Margot_Robbie.wav",
+      "ref_text": null,
+      "language": "English",
+      "num_step": 48,
+      "guidance_scale": 2.0
+    },
+    "missy": {
+      "ref_audio": "voices/Missy_Young_Sheldon.wav",
+      "ref_text": null,
+      "language": "English",
+      "num_step": 48,
+      "guidance_scale": 2.0
+    },
+    "rick": {
+      "ref_audio": "voices/male_rickmorty.mp3",
+      "ref_text": null,
+      "language": "English",
+      "num_step": 48,
+      "guidance_scale": 2.0
+    },
+
     "_example_clone": {
       "ref_audio": "/absolute/path/to/reference.wav",
       "ref_text": "Exact transcript of what is spoken in reference.wav.",

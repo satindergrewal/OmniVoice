@@ -1,4 +1,6 @@
 __pycache__/
+# Local reference-audio clips for voice cloning (never push audio to the fork).
+/voices/
 *.pyc
 *.pyo
 *.egg-info/
