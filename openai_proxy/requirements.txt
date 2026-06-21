@@ -1,0 +1,5 @@
+fastapi>=0.110
+uvicorn[standard]>=0.27
+# omnivoice itself (and torch, soundfile, pydub) must already be installed:
+#   pip install -e .            # from the repo root
+# For mp3 / aac / opus output, ffmpeg must be on PATH (wav / flac / pcm do not need it).

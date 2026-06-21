@@ -1,0 +1,11 @@
+{
+  "default_voice": "alloy",
+  "voices": {
+    "alloy":   { "instruct": "female, young adult, moderate pitch" },
+    "echo":    { "instruct": "male, middle-aged, low pitch" },
+    "fable":   { "instruct": "male, british accent" },
+    "onyx":    { "instruct": "male, low pitch" },
+    "nova":    { "instruct": "female, high pitch" },
+    "shimmer": { "instruct": "female, young adult, high pitch" }
+  }
+}
