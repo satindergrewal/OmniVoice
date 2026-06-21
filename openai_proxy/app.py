@@ -33,7 +33,7 @@ import soundfile as sf
 import torch
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 from omnivoice.models.omnivoice import OmniVoice
 from omnivoice.utils.common import get_best_device
@@ -190,15 +190,28 @@ class SpeechRequest(BaseModel):
     input: str
     voice: Optional[str] = None
     response_format: str = "mp3"
-    speed: float = 1.0
+    # All overrides default to None so we can tell "client omitted it" from an
+    # explicit value, and apply precedence: request > voice preset > default.
+    speed: Optional[float] = None
     # OmniVoice extras (ignored by stock OpenAI clients; usable via extra_body)
     language: Optional[str] = None
     instruct: Optional[str] = None
     ref_audio: Optional[str] = None
     ref_text: Optional[str] = None
+    num_step: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "num_step", "num_steps", "steps", "inference_steps", "num_inference_steps"
+        ),
+    )
+    guidance_scale: Optional[float] = Field(
+        default=None,
+        validation_alias=AliasChoices(
+            "guidance_scale", "cfg", "cfg_scale", "guidance"
+        ),
+    )
 
-    class Config:
-        extra = "ignore"
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
 
 # --------------------------------------------------------------------------- #
@@ -258,11 +271,24 @@ async def create_speech(
         raise HTTPException(status_code=400, detail="'input' must not be empty.")
 
     spec = resolve_voice(req.voice)
-    # Explicit per-request overrides win over the voice preset.
-    instruct = req.instruct if req.instruct is not None else spec.get("instruct")
-    ref_audio = req.ref_audio if req.ref_audio is not None else spec.get("ref_audio")
-    ref_text = req.ref_text if req.ref_text is not None else spec.get("ref_text")
-    language = req.language if req.language is not None else spec.get("language")
+
+    def pick(req_val, key, default):
+        """Precedence: explicit request value > voice preset > global default."""
+        if req_val is not None:
+            return req_val
+        if key in spec:
+            return spec[key]
+        return default
+
+    instruct = pick(req.instruct, "instruct", None)
+    ref_audio = pick(req.ref_audio, "ref_audio", None)
+    ref_text = pick(req.ref_text, "ref_text", None)
+    language = pick(req.language, "language", None)
+    speed = pick(req.speed, "speed", 1.0)
+    num_step = pick(req.num_step, "num_step", GEN_DEFAULTS["num_step"])
+    guidance_scale = pick(
+        req.guidance_scale, "guidance_scale", GEN_DEFAULTS["guidance_scale"]
+    )
 
     gen_kwargs = dict(GEN_DEFAULTS)
     gen_kwargs.update(
@@ -271,17 +297,23 @@ async def create_speech(
         instruct=instruct,
         ref_audio=ref_audio,
         ref_text=ref_text,
-        speed=float(req.speed),
+        speed=float(speed),
+        num_step=int(num_step),
+        guidance_scale=float(guidance_scale),
     )
 
     logger.info(
-        "synth: %d chars | voice=%s instruct=%s ref=%s fmt=%s speed=%s",
+        "synth: %d chars | voice=%s instruct=%s ref=%s fmt=%s lang=%s "
+        "speed=%s steps=%s cfg=%s",
         len(req.input),
         req.voice,
         instruct,
         bool(ref_audio),
         req.response_format,
-        req.speed,
+        language,
+        speed,
+        num_step,
+        guidance_scale,
     )
 
     # Serialize GPU access; run blocking generate() off the event loop.

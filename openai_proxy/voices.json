@@ -11,7 +11,10 @@
     "_example_clone": {
       "ref_audio": "/absolute/path/to/reference.wav",
       "ref_text": "Exact transcript of what is spoken in reference.wav.",
-      "language": "English"
+      "language": "English",
+      "speed": 1.0,
+      "num_step": 32,
+      "guidance_scale": 2.0
     }
   }
 }

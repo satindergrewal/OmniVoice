@@ -101,16 +101,34 @@ For a clone: `ref_audio` is a path **on the machine running the proxy** (an
 absolute path), `ref_text` is the clip's transcript (omit it to auto-transcribe
 via Whisper), and clips should be mono and ≤ ~20s (longer is auto-trimmed).
 
+### Tunables (per voice and per request)
+
+These can be set on a voice preset in `voices.json` **and** overridden per
+request. Precedence is **request > voice preset > global default**.
+
+| Key | Aliases (request) | Default | Meaning |
+|-----|-------------------|---------|---------|
+| `language` | — | auto | language name/code (e.g. `English`, `en`) |
+| `speed` | — | `1.0` | speaking-rate factor (`>1` faster) |
+| `num_step` | `steps`, `inference_steps`, `num_inference_steps` | `32` | diffusion inference steps (higher = slower, often cleaner) |
+| `guidance_scale` | `cfg`, `cfg_scale`, `guidance` | `2.0` | classifier-free guidance (cfg) strength |
+
 ### Per-request overrides (non-OpenAI extras)
 
 Clients that support `extra_body` can override the preset per call:
-`instruct`, `ref_audio`, `ref_text`, `language`.
+`instruct`, `ref_audio`, `ref_text`, `language`, `speed`, `num_step`,
+`guidance_scale`.
 
 ```python
 client.audio.speech.create(
     model="omnivoice", voice="alloy",
     input="Custom styled line.",
-    extra_body={"instruct": "female, australian accent, high pitch"},
+    extra_body={
+        "instruct": "female, australian accent, high pitch",
+        "num_step": 48,
+        "cfg": 2.5,
+        "language": "English",
+    },
 ).stream_to_file("out.mp3")
 ```
 
